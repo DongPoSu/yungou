@@ -1,0 +1,2 @@
+TABLE_SIZE = 64
+DB_SIZE = 16
