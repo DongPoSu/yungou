@@ -31,3 +31,4 @@ class BillDeal(Base):
     user_name=Column(String)
     give_invoice = Column(String)
     check_date =Column(DateTime)
+    give_date = Column(DateTime)
