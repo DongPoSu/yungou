@@ -1,5 +1,6 @@
 TABLE_SIZE = 64
 DB_SIZE = 16
-
+# 发票提现
 BILL_DEAL = 1
+# 微信提现
 NORMAL_DEAL = 0

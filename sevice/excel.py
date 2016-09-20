@@ -9,8 +9,14 @@ from sevice.member_deal import query_deal
 
 
 # 导出发票提现打款
-def export_bill_deal(apply_start_date, apply_end_date, title):
-    deals = query_deal(apply_start_date, apply_end_date, BILL_DEAL)
+def export_bill_deal(check_start_date, check_end_date, title):
+    '''
+    :param check_start_date: 审核开始日期
+    :param check_end_date:  审核结束日期
+    :param title: 文件名
+    :return:
+    '''
+    deals = query_deal(check_start_date, check_end_date, BILL_DEAL)
     wb = Workbook()
     ws = wb.active
     head_line = ['提现号', '序号', '币种', '金额', '收款人账号', '收款人名称', '收款账号开户行名称', '收款省份/收款银行',
@@ -29,9 +35,15 @@ def export_bill_deal(apply_start_date, apply_end_date, title):
     wb.save("%s发票打款名单.xlsx" % (title))
 
 
-# 导出提现
-def export_deal(apply_start_date, apply_end_date, title):
-    deals = query_deal(apply_start_date, apply_end_date, NORMAL_DEAL)
+# 导出提现结果
+def export_deal(give_start_date, give_end_date, title):
+    '''
+    :param apply_start_date:
+    :param apply_end_date:
+    :param title:
+    :return:
+    '''
+    deals = query_deal(give_start_date, give_end_date, NORMAL_DEAL)
     wb = Workbook()
     ws = wb.active
     head_line = ['序号', '姓名', '手机号', '提现金额', '提现状态', '申请日期', '打款备注', '打款日期']
