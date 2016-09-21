@@ -32,15 +32,19 @@ def clear_spike_goods_cache(skuids):
 
 # 添加秒杀产品
 def add_spike_good(goods, date):
+    count = str(goods).count("@")
+    if count is not 3:
+        print("格式不正确！")
+        return
     result = requests.get("http://kuaigouapi.sibu.cn/quick/wave/addWaveActivity?date=%s&goodIdsInfo=%s" % (date, goods))
-    if (result.status_code == 200):
+    if result.status_code == 200:
         clear_spike_goods_cache(goods)
     else:
         print(result.json())
 
 
-add_spike_good(
-    "74048,74191,68219,74184,69695@70059,74185,74187,65469,70081@61829,74046,69755,74189,6843@65585,62031,68315,70077,65021",
-    "2016-09-20", ),
-query_spike_goods()
-# delete_spike_good("2016-05-30")
+# add_spike_good(
+#     "61895,66049,69365,69669,65361@66115,69353,69345,25898,69359@64797,68439,68387,66019,64713@70051,69363,70075,73970,69485",
+#     "2016-09-21")
+# query_spike_goods()
+# delete_spike_good("2016-09-21")

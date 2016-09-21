@@ -38,8 +38,8 @@ def export_bill_deal(check_start_date, check_end_date, title):
 # 导出提现结果
 def export_deal(give_start_date, give_end_date, title):
     '''
-    :param apply_start_date:
-    :param apply_end_date:
+    :param give_start_date: 打款开始时间
+    :param give_end_date: 打款结束时间
     :param title:
     :return:
     '''
