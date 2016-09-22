@@ -104,7 +104,7 @@ def update_order_trade(list):
     for i in list:
         order_code = str(i[0])
         trade_id = str(i[1])
-        print("order_code: "+ order_code + " trade_id: " + trade_id)
+
         module = DbUtil.get_mod_16(DbUtil.get_module_by_order_code(order_code))
         table_index = DbUtil.get_mode_64(DbUtil.get_module_by_order_code(order_code))
         db_url = DbUtil.get_db_url(module)
@@ -114,10 +114,11 @@ def update_order_trade(list):
             module, table_index, trade_id, order_code)
         result = cursor.execute(sql)
         if(result <= 0 ):
+            print("订单流水号已经存在: %s" + order_code)
             continue
         try:
             db.commit()
-            print("success: " +str(result))
+            print("success:%s %s" %(order_code,trade_id))
         except:
             print("failed: " + order_code)
             db.rollback()
@@ -126,7 +127,7 @@ def update_order_trade(list):
 
 # 扫描没有 流水号的订单
 def scanNoTradeIdOrder(start_date, end_date):
-    exec_trade_sql = 'SELECT count(*) FROM('
+    exec_trade_sql = 'SELECT c.order_code FROM('
     for i in range(db_constants.TABLE_SIZE):
         index = StrUtil.format(i)
         exec_trade_sql += "SELECT * FROM sibu_directsale_order_%s.doing_order_"+index+" a WHERE a.payment_number IS NULL" \
@@ -136,7 +137,7 @@ def scanNoTradeIdOrder(start_date, end_date):
         if (i < db_constants.TABLE_SIZE - 1):
             exec_trade_sql += ' union all '
     exec_trade_sql += ") c where c.payment_number is null and c.pay_date>='" + start_date + "' AND c.pay_date<='" + end_date + "'"
-    count = 0
+    fo = open("resources/test.txt", "r+")
     for i in range(db_constants.DB_SIZE):
         module = StrUtil.format(i)
         db_url = DbUtil.get_db_url(module)
@@ -144,7 +145,13 @@ def scanNoTradeIdOrder(start_date, end_date):
         cursor = db.cursor()
         cursor.execute(exec_trade_sql.replace("%s", module))
         result = cursor.fetchall()
-        count += int(result[0][0])
-        cursor.close()
-    print(str(count))
-scanNoTradeIdOrder("2016-08-04 00:00:00", "2016-08-18 23:59:59")
+        for i in result:
+            fo.write(i[0] + "\n")
+
+scanNoTradeIdOrder("2016-08-30 00:00:00", "2016-08-31 23:59:59")
+# read = open("test.txt", "r+")
+# write = open("resources/result.txt", "r+")
+#
+# for line in open("test.txt"):
+#     line = read.readline()
+#     write.write(line[0:17] +"\n")

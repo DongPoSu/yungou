@@ -3,12 +3,16 @@
 import os
 
 from openpyxl import Workbook
+from openpyxl import load_workbook
 
 from constants.db_constants import BILL_DEAL, NORMAL_DEAL
 from sevice.member_deal import query_deal
 
 
 # 导出发票提现打款
+from sevice.order_service import update_order_trade
+
+
 def export_bill_deal(check_start_date, check_end_date, title):
     '''
     :param check_start_date: 审核开始日期
@@ -32,7 +36,7 @@ def export_bill_deal(check_start_date, check_end_date, title):
              deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "广州思埠网络开发有限公司", "3602202119100259501", "", "代付款",
              title, "", deal.phone, "", ""])
 
-    wb.save("%s发票打款名单.xlsx" % (title))
+    wb.save("resources/%s发票打款名单.xlsx" % (title))
 
 
 # 导出提现结果
@@ -55,4 +59,18 @@ def export_deal(give_start_date, give_end_date, title):
             [count, deal.user_name, deal.phone, deal.apply_money, deal.deal_status,
              deal.apply_date.strftime('%Y-%m-%d %H:%M:%S'), deal.give_invoice,
              deal.give_date.strftime('%Y-%m-%d %H:%M:%S')])
-    wb.save("%s提现打款结果.xlsx" % (title))
+    wb.save("resources/%s提现打款结果.xlsx" % (title))
+
+
+def import_order_trade_id(filename):
+    wb = load_workbook(filename=filename, read_only=True)
+    ws = wb['Sheet1']  # ws is now an IterableWorksheet
+    list=[]
+    for row in ws.rows:
+        if str(row[0].value) == "":
+            pass
+        data = str(row[0].value),str(row[1].value)
+        list.append(data)
+    update_order_trade(list)
+    # print(len(list))
+# import_order_trade_id('resources/0804_0818_wechat_trade.xlsx')
