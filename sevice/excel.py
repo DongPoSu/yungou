@@ -36,7 +36,7 @@ def export_bill_deal(check_start_date, check_end_date, title):
              deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "广州思埠网络开发有限公司", "3602202119100259501", "代付款","",
              title, "", deal.phone, "", ""])
 
-    wb.save("resources/%s发票打款名单.xlsx" % (title))
+    wb.save("resources/%s银行卡打款名单.xlsx" % (title))
 
 
 # 导出提现结果
