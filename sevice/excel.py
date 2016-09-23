@@ -23,7 +23,7 @@ def export_bill_deal(check_start_date, check_end_date, title):
     deals = query_deal(check_start_date, check_end_date, BILL_DEAL)
     wb = Workbook()
     ws = wb.active
-    head_line = ['提现号', '序号', '币种', '金额', '收款人账号', '收款人名称', '收款账号开户行名称', '收款省份/收款银行',
+    head_line = ['提现号','审核日期','序号', '币种', '金额', '收款人账号', '收款人名称', '收款账号开户行名称', '收款省份/收款银行',
                  '收款地市', '地区代码', '付款账号开户行名称', '付款人账号/卡号', '付款人名称 / 卡名称',
                  '汇款用途', '备注', '预约付款日期', '汇款方式', '收款账户短信通知手机号码', '自定义序号', '协议编号']
     ws.append(head_line)
@@ -31,9 +31,9 @@ def export_bill_deal(check_start_date, check_end_date, title):
     for deal in deals:
         count += 1
         ws.append(
-            [deal.deal_code, count, "人民币", deal.apply_money, deal.bank_account, deal.bank_user, deal.bankcard_address,
+            [deal.deal_code,deal.check_date.strftime('%Y-%m-%d %H:%M:%S'), count, "人民币", deal.apply_money, deal.bank_account, deal.bank_user, deal.bankcard_address,
              deal.bankcard_province,
-             deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "广州思埠网络开发有限公司", "3602202119100259501", "", "代付款",
+             deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "广州思埠网络开发有限公司", "3602202119100259501", "代付款","",
              title, "", deal.phone, "", ""])
 
     wb.save("resources/%s发票打款名单.xlsx" % (title))
