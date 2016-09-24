@@ -9,11 +9,11 @@ from constants.db_constants import BILL_DEAL, NORMAL_DEAL
 from sevice.member_deal import query_deal
 
 
-# 导出发票提现打款
+
 from sevice.order_service import update_order_trade
 
-
-def export_bill_deal(check_start_date, check_end_date, title):
+# 导出银行卡审核通过提现记录
+def export_bank_deal(check_start_date, check_end_date, title):
     '''
     :param check_start_date: 审核开始日期
     :param check_end_date:  审核结束日期
@@ -39,8 +39,8 @@ def export_bill_deal(check_start_date, check_end_date, title):
     wb.save("resources/%s银行卡打款名单.xlsx" % (title))
 
 
-# 导出提现结果
-def export_deal(give_start_date, give_end_date, title):
+# 导出微信提现打款结果
+def export_wx_deal(give_start_date, give_end_date, title):
     '''
     :param give_start_date: 打款开始时间
     :param give_end_date: 打款结束时间
@@ -59,7 +59,7 @@ def export_deal(give_start_date, give_end_date, title):
             [count, deal.user_name, deal.phone, deal.apply_money, deal.deal_status,
              deal.apply_date.strftime('%Y-%m-%d %H:%M:%S'), deal.give_invoice,
              deal.give_date.strftime('%Y-%m-%d %H:%M:%S')])
-    wb.save("resources/%s提现打款结果.xlsx" % (title))
+    wb.save("resources/%s微信打款结果.xlsx" % (title))
 
 
 def import_order_trade_id(filename):

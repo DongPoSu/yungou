@@ -38,16 +38,28 @@ def add_spike_good(goods, date):
         return
     result = requests.get("http://kuaigouapi.sibu.cn/quick/wave/addWaveActivity?date=%s&goodIdsInfo=%s" % (date, goods))
     if result.status_code == 200:
+        print(result)
         clear_spike_goods_cache(goods)
     else:
         print(result.json())
 
 
 add_spike_good(
-    "70051,70055,70019,69573,72419@70005,74567,70071,64955,68279@74569,66049,68387,64983,69671@69621,69503,68439,69755,67805",
-    "2016-09-23")
+    "73989,74154,74153,69357,64743@64745,74046,66029,68483,68415@64797,69355,74155,74157,70057@67807,69349,74156,64993,70011",
+    "2016-09-26")
 query_spike_goods()
 # delete_spike_good("2016-09-21")
+
+
+
+
+
+
+
+
+
+
+
 
 
 
