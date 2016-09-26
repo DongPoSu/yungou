@@ -4,13 +4,14 @@ import os
 
 from openpyxl import Workbook
 from openpyxl import load_workbook
+from sqlalchemy.sql.functions import now
 
 from constants.db_constants import BILL_DEAL, NORMAL_DEAL
+from dao import Deal
 from sevice.member_deal import query_deal
 
-
-
 from sevice.order_service import update_order_trade
+
 
 # 导出银行卡审核通过提现记录
 def export_bank_deal(check_start_date, check_end_date, title):
@@ -23,7 +24,7 @@ def export_bank_deal(check_start_date, check_end_date, title):
     deals = query_deal(check_start_date, check_end_date, BILL_DEAL)
     wb = Workbook()
     ws = wb.active
-    head_line = ['提现号','审核日期','序号', '币种', '金额', '收款人账号', '收款人名称', '收款账号开户行名称', '收款省份/收款银行',
+    head_line = ['提现号', '审核日期', '序号', '币种', '金额', '收款人账号', '收款人名称', '收款账号开户行名称', '收款省份/收款银行',
                  '收款地市', '地区代码', '付款账号开户行名称', '付款人账号/卡号', '付款人名称 / 卡名称',
                  '汇款用途', '备注', '预约付款日期', '汇款方式', '收款账户短信通知手机号码', '自定义序号', '协议编号']
     ws.append(head_line)
@@ -31,9 +32,10 @@ def export_bank_deal(check_start_date, check_end_date, title):
     for deal in deals:
         count += 1
         ws.append(
-            [deal.deal_code,deal.check_date.strftime('%Y-%m-%d %H:%M:%S'), count, "人民币", deal.apply_money, deal.bank_account, deal.bank_user, deal.bankcard_address,
+            [deal.deal_code, deal.check_date.strftime('%Y-%m-%d %H:%M:%S'), count, "人民币", deal.apply_money,
+             deal.bank_account, deal.bank_user, deal.bankcard_address,
              deal.bankcard_province,
-             deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "广州思埠网络开发有限公司", "3602202119100259501", "代付款","",
+             deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "3602202119100259501", "广州思埠网络开发有限公司", "代付款", "",
              title, "", deal.phone, "", ""])
 
     wb.save("resources/%s银行卡打款名单.xlsx" % (title))
@@ -65,12 +67,39 @@ def export_wx_deal(give_start_date, give_end_date, title):
 def import_order_trade_id(filename):
     wb = load_workbook(filename=filename, read_only=True)
     ws = wb['Sheet1']  # ws is now an IterableWorksheet
-    list=[]
+    list = []
     for row in ws.rows:
         if str(row[0].value) == "":
             pass
-        data = str(row[0].value),str(row[1].value)
+        data = str(row[0].value), str(row[1].value)
         list.append(data)
-    update_order_trade(list)
-    # print(len(list))
-# import_order_trade_id('resources/0804_0818_wechat_trade.xlsx')
+
+
+def import_bank_deal(filename):
+    wb = load_workbook(filename=filename, read_only=True)
+    ws = wb["Sheet1"]
+    list = []
+    count = 0
+    for row in ws.rows:
+        if count is 0:
+            count += 1
+            continue
+
+        deal_result = Deal.BillDealResult()
+        deal_result.bank_account = row[2].value
+        deal_result. bank_user=row[3].value
+        deal_result.apply_money = int(row[6].value * 100)
+        deal_result.give_date = now()
+        if str(row[8].value) == '处理成功':
+            deal_result.deal_status = 4
+        else:
+            deal_result.deal_status = 5
+        if row[9].value is None:
+            deal_result.give_invoice = ""
+        else:
+            deal_result.give_invoice = row[9].value
+        list.append(deal_result)
+
+
+
+

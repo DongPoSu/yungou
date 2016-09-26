@@ -50,7 +50,7 @@ def repair_member_address():
                 db.rollback()
             db.close()
 
-scan_exception_address()
+# scan_exception_address()
 # repair_member_address()
 
 

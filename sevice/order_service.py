@@ -148,7 +148,7 @@ def scanNoTradeIdOrder(start_date, end_date):
         for i in result:
             fo.write(i[0] + "\n")
 
-scanNoTradeIdOrder("2016-08-30 00:00:00", "2016-08-31 23:59:59")
+# scanNoTradeIdOrder("2016-08-30 00:00:00", "2016-08-31 23:59:59")
 # read = open("test.txt", "r+")
 # write = open("resources/result.txt", "r+")
 #
