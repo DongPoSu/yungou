@@ -34,16 +34,14 @@ class BillDeal(Base):
 
 
 # 定义User对象:
-class BillDealResult():
-    apply_member_id = Column(String, primary_key=True)
-    deal_code = Column(String)
+class BillDealResult(Base):
+    __tablename__ = 'billdealresult'
+    member_id = Column(String, primary_key=True)
+    deal_id= Column(String, primary_key=True)
     apply_money = Column(Integer)
     give_invoice = Column(String)
     bank_account = Column(String)
     bank_user = Column(String)
     deal_status = Column(Integer)
-    give_date = Column(DateTime)
 
-    def __init__(self,**kwargs):
-        self.give_invoice = kwargs.get("apply_money")
 

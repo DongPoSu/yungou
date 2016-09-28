@@ -11,7 +11,7 @@ def copy_tradenum(order_list):
     for i in order_list:
         module = DbUtil.get_mod_16(DbUtil.get_module_by_order_code(i))
         table_index = DbUtil.get_mode_64(DbUtil.get_module_by_order_code(i))
-        db_url = DbUtil.get_db_url(module)
+        db_url = DbUtil.get_db_ip(module)
 
         db = pymysql.connect(db_url, "root", "Aa123456", "sibu_directsale")
         cursor = db.cursor()
@@ -56,7 +56,7 @@ def search_order(price_start, price_end, start_date, end_date, is_pay):
                      price_end=price_end, is_pay=is_pay)
     print(sql)
     for i in range(16):
-        db_url = DbUtil.get_db_url(i)
+        db_url = DbUtil.get_db_ip(i)
         module = StrUtil.format(i)
         table = "sibu_directsale_order_" + module
         db = pymysql.connect(db_url, "root", "Aa123456", table)
@@ -72,7 +72,7 @@ def query_order(order_list):
         sql = "SELECT order_code, order_status, express_id, express_code,address,ship_date from sibu_directsale_order_{module}.doing_order_{table_index} WHERE order_code='{order_code}'"
         module = DbUtil.get_mod_16(DbUtil.get_module_by_order_code(i))
         table_index = DbUtil.get_mode_64(DbUtil.get_module_by_order_code(i))
-        db_url = DbUtil.get_db_url(module)
+        db_url = DbUtil.get_db_ip(module)
         db = pymysql.connect(host=db_url, user="root", passwd="Aa123456", db="sibu_directsale", charset="utf8mb4")
         sql = sql.format(module=module, table_index=table_index, order_code=i)
         cursor = db.cursor()
@@ -91,7 +91,7 @@ def update_trade_id_by_create(start_date, end_date):
             exec_trade_sql += ' union all '
     exec_trade_sql += ")a WHERE a.trade_id NOT LIKE ('T%') AND a.create_date>='" + start_date + "' AND a.create_date<='" + end_date + "'"
     for i in range(db_constants.DB_SIZE):
-        db_url = DbUtil.get_db_url(StrUtil.format(i))
+        db_url = DbUtil.get_db_ip(StrUtil.format(i))
         db = pymysql.connect(host=db_url, user="root", passwd="Aa123456", db="sibu_directsale_order_log_"+StrUtil.format(i), charset="utf8mb4")
         cursor = db.cursor()
         cursor.execute(exec_trade_sql)
@@ -107,7 +107,7 @@ def update_order_trade(list):
 
         module = DbUtil.get_mod_16(DbUtil.get_module_by_order_code(order_code))
         table_index = DbUtil.get_mode_64(DbUtil.get_module_by_order_code(order_code))
-        db_url = DbUtil.get_db_url(module)
+        db_url = DbUtil.get_db_ip(module)
         db = pymysql.connect(db_url, "root", "Aa123456", "sibu_directsale")
         cursor = db.cursor()
         sql = "UPDATE sibu_directsale_order_%s.doing_order_%s o SET o.payment_number = %s WHERE o.payment_number IS NULL AND o.order_code = '%s'" % (
@@ -140,7 +140,7 @@ def scanNoTradeIdOrder(start_date, end_date):
     fo = open("resources/test.txt", "r+")
     for i in range(db_constants.DB_SIZE):
         module = StrUtil.format(i)
-        db_url = DbUtil.get_db_url(module)
+        db_url = DbUtil.get_db_ip(module)
         db = pymysql.connect(host=db_url, user="root", passwd="Aa123456",db="sibu_directsale", charset="utf8mb4")
         cursor = db.cursor()
         cursor.execute(exec_trade_sql.replace("%s", module))

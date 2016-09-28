@@ -14,7 +14,7 @@ def scan_exception_address():
            "WHERE  (a.province LIKE'上海市' or a.province LIKE '天津市' or a.province LIKE '重庆市' or a.province LIKE '深圳市') and a.city='县'"
     print(sql)
     for i in range(db_constants.DB_SIZE):
-        db_url = DbUtil.get_db_url(i)
+        db_url = DbUtil.get_db_ip(i)
         module = StrUtil.format(i)
         table = "sibu_directsale_member_" + module
         db = pymysql.connect(db_url, "root", "Aa123456", table, charset = "utf8mb4")
@@ -30,7 +30,7 @@ def scan_exception_address():
 def repair_member_address():
     result = 0
     for i in range(db_constants.DB_SIZE):
-        db_url = DbUtil.get_db_url(i)
+        db_url = DbUtil.get_db_ip(i)
         module = StrUtil.format(i)
         table = "sibu_directsale_member_" + module
         for i in range(db_constants.TABLE_SIZE):

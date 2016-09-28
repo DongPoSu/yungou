@@ -1,11 +1,13 @@
 # coding=utf8
 from common import DbUtil
 from common import StrUtil
+from common.DealStatus import PAY_SUCCESS, PAY_FAILED
 from constants import db_constants
 from constants.db_constants import BILL_DEAL
 from dao import Deal
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 
 
 def init_sql(start_date, end_date, apply_type):
@@ -38,8 +40,8 @@ def query_deal(start_date, end_date, apply_type):
     sql = init_sql(start_date, end_date, apply_type)
     for i in range(db_constants.DB_SIZE):
         db_index = StrUtil.format(i)
-        ip = DbUtil.get_db_url(db_index)
-        session = get_db_session(db_url, ip)
+        ip = DbUtil.get_db_ip(db_index)
+        session = get_db_session(ip)
         exc_sql = sql.format(db_index=db_index)
         print(exc_sql)
         # try:
@@ -52,7 +54,8 @@ def query_deal(start_date, end_date, apply_type):
     return deals
 
 
-def get_db_session(db_url, ip):
+def get_db_session(ip):
+    db_url = "mysql+pymysql://root:Aa123456@{ip}:3306/sibu_directsale"
     # 初始化数据库连接:
     engine = create_engine(db_url.format(ip=ip), connect_args={'charset': 'utf8'}, echo=True)
     # 创建DBSession类型:
@@ -61,40 +64,108 @@ def get_db_session(db_url, ip):
     return session
 
 
-def update_bank_deal(deal_result):
+def check_bank_deal(deal_result):
     # 查询member_id
     for i in range(db_constants.DB_SIZE):
         db_index = StrUtil.format(i)
         reuslt_list = query_member_id(db_index, deal_result)
-        # 更新提现状态
-        # 更新用户可用余额和提现总金额
-        # 插入支出流水
-
+        if len(reuslt_list) != 0:
+            update_bank_deal(db_index, reuslt_list)
 
 def query_member_id(db_index, deals):
-    db_url = "mysql+pymysql://root:Aa123456@{ip}:3306/sibu_directsale"
-    ip = DbUtil.get_db_url(db_index)
-    session = get_db_session(db_url=db_url, ip=ip)
-    exc_sql = "SELECT c.member_id,d.deal_code"\
+
+    ip = DbUtil.get_db_ip(db_index)
+    session = get_db_session(ip=ip)
+    exc_sql = "SELECT c.member_id,d.deal_id"\
     " FROM" \
     " sibu_directsale_member_{db_index}.member_account c" \
     " JOIN sibu_directsale_profit_{db_index}.member_deal d ON c.member_id = d.apply_member_id"\
-    " WHERE c.bank_account = {bank_account}" \
-    " AND c.bank_user = {bank_user}" \
+    " WHERE c.bank_account = '{bank_account}'" \
+    " AND c.bank_user = '{bank_user}'" \
     " AND d.apply_money = {apply_money}" \
-    " AND d.deal_status = 2" \
     " AND d.apply_type = 1"
     result_list = []
     for deal in deals:
         result = session.query(Deal.BillDealResult) \
-            .from_statement(exc_sql).first()
+            .from_statement(exc_sql.format(db_index=db_index,bank_account=deal.bank_account,bank_user=deal.bank_user, apply_money=deal.apply_money)).first()
         if result is None:
             continue
-        deal.deal_code = result.deal_code
+        deal.deal_id = result.deal_id
         deal.member_id = result.member_id
         result_list.append(deal)
     for d in result_list:
         deals.remove(d)
     session.close()
     return result_list
+
+def update_bank_deal(db_index, deals):
+    for deal in deals:
+        if deal.deal_status == PAY_SUCCESS:
+            update_success(db_index,deal)
+        # elif deal.deal_status == PAY_FAILED:
+            # update_failed(db_index, deal)
+
+def update_success(db_index,deal):
+    exec_sql = "UPDATE sibu_directsale_profit_%s.member_deal SET"\
+    " deal_status = %d," \
+    " update_date = now()," \
+    " give_user_id = 1," \
+    " give_date = now()," \
+    " give_invoice = '%s'," \
+    " service_charge_money = 0," \
+    " proxy_tax_money = 0," \
+    " back_money = 0," \
+    " give_money = apply_money," \
+    " deduct_tax_money = 0," \
+    " remainder_money = 0" \
+    " WHERE" \
+    " delete_flag = 0" \
+    " AND" \
+    " deal_id  = '%s'" \
+    " AND" \
+    " deal_status = 2" % (db_index,deal.deal_status,deal.give_invoice,deal.deal_id)
+    session = get_db_session(ip = DbUtil.get_db_ip(db_index))
+    session.begin(subtransactions=True)
+    try:
+        result = session.execute(exec_sql)
+        if(result.rowcount == 1):
+            session.commit()
+        else:
+            session.rollback()
+    except Exception as err:
+        print(err)
+        session.rollback()
+    session.close()
+
+
+
+# def update_failed(db_index, deal):
+    # 更新提现状态
+    exec_sql = "UPDATE member_deal SET" \
+               " deal_status = %d," \
+               " update_date = now()," \
+               " give_user_id = 1," \
+               " give_date = now()," \
+               " give_invoice = '%s'," \
+               " service_charge_money = 0," \
+               " proxy_tax_money = 0," \
+               " back_money = 0," \
+               " give_money = apply_money," \
+               " deduct_tax_money = 0," \
+               " remainder_money = 0" \
+               " WHERE" \
+               " delete_flag = 0" \
+               " AND" \
+               " deal_id  = '%s'" \
+               " AND" \
+               " deal_status = 2" % (deal.deal_status, deal.give_invoice, deal.deal_id)
+    session = get_db_session(ip=DbUtil.get_db_ip(db_index))
+    session.begin(subtransactions=True)
+    try:
+        session.execute(exec_sql)
+        session.commit()
+    except:
+        session.rollback()
+    # 更新用户可用余额和提现总金额
+    # 插入支出流水
 

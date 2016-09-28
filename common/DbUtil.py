@@ -1,4 +1,6 @@
 # coding=utf-8
+from common.Config import ENVIRONMENT
+
 YUN_PRE_ORDER_CODE = "Y"
 LAST_CHAR_1 = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f")
 LAST_CHAR_2 = (
@@ -28,13 +30,17 @@ LAST_CHAR_2 = (
     "e7", "e8", "e9", "ea", "eb", "ec", "ed", "ee", "ef", "f0", "f1",
     "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff")
 
-db_url = {
+# 正式环境
+db_ip = {
     "master": "192.168.1.210",
     "00-03": "192.168.1.208",
     "04-07": "192.168.1.209",
     "08-11": "192.168.1.211",
     "12-15": "192.168.1.229"
 }
+
+# UAT环境
+uat_db_ip = "192.168.1.113"
 
 table_mod_count = 64
 
@@ -81,15 +87,18 @@ def get_module_by_order_code(order_code):
     return LAST_CHAR_2[int(prefix)]
 
 
-def get_db_url(module):
-    module = int(module)
-    if module >= 0 and module <= 3:
-        return db_url.get("00-03")
-    elif module >= 4 and module <= 7:
-        return db_url.get("04-07")
-    elif module >= 8 and module <= 11:
-        return db_url.get("08-11")
-    elif module >= 12 and module <= 15:
-        return db_url.get("12-15")
+def get_db_ip(module):
+    if ENVIRONMENT == "uat":
+        return uat_db_ip
+    elif ENVIRONMENT == "product":
+        module = int(module)
+        if module >= 0 and module <= 3:
+            return db_ip.get("00-03")
+        elif module >= 4 and module <= 7:
+            return db_ip.get("04-07")
+        elif module >= 8 and module <= 11:
+            return db_ip.get("08-11")
+        elif module >= 12 and module <= 15:
+            return db_ip.get("12-15")
 
 

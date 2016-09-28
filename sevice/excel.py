@@ -1,16 +1,12 @@
 # coding=utf8
 
-import os
-
 from openpyxl import Workbook
 from openpyxl import load_workbook
-from sqlalchemy.sql.functions import now
 
+from common.DealStatus import PAY_SUCCESS, PAY_FAILED
 from constants.db_constants import BILL_DEAL, NORMAL_DEAL
 from dao import Deal
-from sevice.member_deal import query_deal
-
-from sevice.order_service import update_order_trade
+from sevice.member_deal import query_deal, check_bank_deal
 
 
 # 导出银行卡审核通过提现记录
@@ -36,7 +32,7 @@ def export_bank_deal(check_start_date, check_end_date, title):
              deal.bank_account, deal.bank_user, deal.bankcard_address,
              deal.bankcard_province,
              deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "3602202119100259501", "广州思埠网络开发有限公司", "代付款", "",
-             title, "", deal.phone, "", ""])
+             title, "加急", deal.phone, "", ""])
 
     wb.save("resources/%s银行卡打款名单.xlsx" % (title))
 
@@ -86,19 +82,20 @@ def import_bank_deal(filename):
             continue
 
         deal_result = Deal.BillDealResult()
-        deal_result.bank_account = row[2].value
-        deal_result. bank_user=row[3].value
+        deal_result.bank_account = str(row[2].value).strip("\t").strip(" ")
+        deal_result.bank_user=row[3].value
         deal_result.apply_money = int(row[6].value * 100)
-        deal_result.give_date = now()
         if str(row[8].value) == '处理成功':
-            deal_result.deal_status = 4
+            deal_result.deal_status = PAY_SUCCESS
         else:
-            deal_result.deal_status = 5
+            deal_result.deal_status = PAY_FAILED
         if row[9].value is None:
             deal_result.give_invoice = ""
         else:
             deal_result.give_invoice = row[9].value
         list.append(deal_result)
+    check_bank_deal(list)
+
 
 
 
