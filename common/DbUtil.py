@@ -91,6 +91,8 @@ def get_db_ip(module):
     if ENVIRONMENT == "uat":
         return uat_db_ip
     elif ENVIRONMENT == "product":
+        if module == "master":
+            return db_ip.get(module)
         module = int(module)
         if module >= 0 and module <= 3:
             return db_ip.get("00-03")

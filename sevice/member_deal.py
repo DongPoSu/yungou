@@ -26,10 +26,10 @@ def init_sql(start_date, end_date, apply_type):
           " LEFT JOIN sibu_directsale_member_{db_index}.member_account c ON d.apply_member_id = c.member_id " \
           " LEFT JOIN sibu_directsale.member m ON m.member_id = d.apply_member_id"
     if apply_type is BILL_DEAL:
-        where_sql = " WHERE d.check_date >= '%s' AND d.check_date <='%s' AND d.apply_type =%d AND d.deal_status = 2" % (
+        where_sql = " WHERE d.delete_flag=0 and d.check_date >= '%s' AND d.check_date <='%s' AND d.apply_type =%d AND d.deal_status = 2" % (
             start_date, end_date, apply_type)
     else:
-        where_sql = " WHERE d.give_date >= '%s' AND d.give_date <= '%s' AND d.apply_type =%d " % (
+        where_sql = " WHERE d.delete_flag=0 and d.give_date >= '%s' AND d.give_date <= '%s' AND d.apply_type =%d " % (
             start_date, end_date, apply_type)
     return sql + where_sql
 
@@ -139,9 +139,9 @@ def update_success(db_index,deal):
 
 
 
-# def update_failed(db_index, deal):
+def update_failed(db_index, deal):
     # 更新提现状态
-    exec_sql = "UPDATE member_deal SET" \
+    exec_deal_sql = "UPDATE sibu_directsale_profit_%s.member_deal SET" \
                " deal_status = %d," \
                " update_date = now()," \
                " give_user_id = 1," \
@@ -158,14 +158,92 @@ def update_success(db_index,deal):
                " AND" \
                " deal_id  = '%s'" \
                " AND" \
-               " deal_status = 2" % (deal.deal_status, deal.give_invoice, deal.deal_id)
+               " deal_status = 2" % (db_index,deal.deal_status, deal.give_invoice, deal.deal_id)
+    profit_total_sql = "UPDATE sibu_directsale_profit_%s.member_profit_total " \
+                       " SET available_money = available_money +%d," \
+                       " deal_sum_money = deal_sum_money -%d  WHERE member_id ='%s'" % (db_index,deal.apply_money,deal.apply_money,deal.member_id)
     session = get_db_session(ip=DbUtil.get_db_ip(db_index))
     session.begin(subtransactions=True)
     try:
-        session.execute(exec_sql)
+        session.execute(exec_deal_sql)
+        session.execute(profit_total_sql)
         session.commit()
     except:
         session.rollback()
     # 更新用户可用余额和提现总金额
     # 插入支出流水
 
+
+def get_member_id(phone_list):
+    session = get_db_session(ip=DbUtil.get_db_ip("master"))
+    fo = open("../resources/text.txt", "w+")
+    fo.write('[')
+    for i in phone_list:
+        result = session.execute("select member_id from sibu_directsale.member WHERE phone =%s"% i)
+        print(result.cursor._rows[0][0])
+        fo.write('\''+result.cursor._rows[0][0] +'\',')
+    fo.write(']')
+    fo.close()
+
+phone_list = ['13701770439',
+'15999909799',
+'18381031877',
+'13819707913',
+'14100010007',
+'14202028248',
+'14222141871',
+'15158375686',
+'14219142519',
+'18622096274',
+'18928785525',
+'14210360245',
+'14100010016',
+'15920589755',
+'18818841982',
+'13408577235',
+'15000961389',
+'15901619716',
+'13918529040',
+'15984211908',
+'13802756272',
+'15000474852',
+'13291986669',
+'18620664806',
+'13686462646',
+'18566150696',
+'18105754434',
+'15521033073',
+'13633804476',
+'18128540696',
+'18657162876',
+'15383292951',
+'18602042253',
+'13511328878',
+'15820490114',
+'13837374666',
+'13914048840',
+'13485180150',
+'18366198456',
+'18774996568',
+'13817029808',
+'15933618606',
+'13953902726',
+'15110079681',
+'15878361169',
+'13902233081',
+'15095150301',
+'18824164369',
+'13989860829',
+'13560464254',
+'13985923661',
+'13423385731',
+'15111272728',
+'15165169111',
+'18621977512',
+'15006195333',
+'13811135823',
+'13251935660',
+'13286864279',
+'18657593166',
+'14000010001']
+# get_member_id(phone_list)
