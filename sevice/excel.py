@@ -28,7 +28,7 @@ def export_bank_deal(check_start_date, check_end_date, title):
     for deal in deals:
         count += 1
         ws.append(
-            [deal.deal_code, deal.check_date.strftime('%Y-%m-%d %H:%M:%S'), count, "人民币", deal.apply_money,
+            [deal.deal_code, deal.check_date.strftime('%Y-%m-%d %H:%M:%S'), count, "人民币", round(float(deal.apply_money) * 0.99,2),
              deal.bank_account, deal.bank_user, deal.bankcard_address,
              deal.bankcard_province,
              deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "3602202119100259501", "广州思埠网络开发有限公司", "代付款", "",
