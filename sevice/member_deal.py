@@ -163,7 +163,6 @@ def update_failed(db_index, deal):
                        " SET available_money = available_money +%d," \
                        " deal_sum_money = deal_sum_money -%d  WHERE member_id ='%s'" % (db_index,deal.apply_money,deal.apply_money,deal.member_id)
     session = get_db_session(ip=DbUtil.get_db_ip(db_index))
-    session.begin(subtransactions=True)
     try:
         session.execute(exec_deal_sql)
         session.execute(profit_total_sql)
@@ -185,65 +184,35 @@ def get_member_id(phone_list):
     fo.write(']')
     fo.close()
 
-phone_list = ['13701770439',
-'15999909799',
-'18381031877',
-'13819707913',
-'14100010007',
-'14202028248',
-'14222141871',
-'15158375686',
-'14219142519',
-'18622096274',
-'18928785525',
-'14210360245',
-'14100010016',
-'15920589755',
-'18818841982',
-'13408577235',
-'15000961389',
-'15901619716',
-'13918529040',
-'15984211908',
-'13802756272',
-'15000474852',
-'13291986669',
-'18620664806',
-'13686462646',
-'18566150696',
-'18105754434',
-'15521033073',
-'13633804476',
-'18128540696',
-'18657162876',
-'15383292951',
-'18602042253',
-'13511328878',
-'15820490114',
-'13837374666',
-'13914048840',
-'13485180150',
-'18366198456',
-'18774996568',
-'13817029808',
-'15933618606',
-'13953902726',
-'15110079681',
-'15878361169',
-'13902233081',
-'15095150301',
-'18824164369',
-'13989860829',
-'13560464254',
-'13985923661',
-'13423385731',
-'15111272728',
-'15165169111',
-'18621977512',
-'15006195333',
-'13811135823',
-'13251935660',
-'13286864279',
-'18657593166',
-'14000010001']
-# get_member_id(phone_list)
+
+def delete_member_deal(ids):
+    sql = "UPDATE sibu_directsale_profit_{db_index}.member_deal d" \
+          " SET d.delete_flag = 1" \
+          " WHERE" \
+          " d.deal_status IN (1,2)" \
+          " AND d.apply_member_id IN {ids}"
+    for db_index in range (db_constants.DB_SIZE):
+        db_index = StrUtil.format(db_index)
+        session = get_db_session(ip=DbUtil.get_db_ip(db_index))
+        try:
+            result = session.execute(sql.format(db_index=db_index, ids=ids[0]))
+            session.commit()
+        except:
+            session.rollback()
+
+
+def query_member_deal(ids):
+    sql = " SELECT d.deal_code,d.apply_member_id,d.deal_status,d.delete_flag,d.apply_money*0.01 as apply_money,m.phone" \
+          " FROM sibu_directsale_profit_{db_index}.member_deal d, sibu_directsale.member m" \
+          " WHERE d.deal_status IN (1,2) " \
+          " AND d.apply_member_id IN {ids} AND  m.member_id = d.apply_member_id"
+    result_list = []
+    for db_index in range(db_constants.DB_SIZE):
+        db_index = StrUtil.format(db_index)
+        session = get_db_session(ip=DbUtil.get_db_ip(db_index))
+        result = session.query(Deal.BillDeal).from_statement(sql.format(db_index=db_index, ids=ids)).all()
+        result_list.extend(result)
+    for deal in result_list:
+        print(deal.deal_code,deal.apply_member_id,str(deal.deal_status), str(deal.delete_flag),str(deal.apply_money),str(deal.phone))
+
+

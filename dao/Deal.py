@@ -31,7 +31,7 @@ class BillDeal(Base):
     give_invoice = Column(String)
     check_date = Column(DateTime)
     give_date = Column(DateTime)
-
+    delete_flag = Column(Integer)
 
 # 定义User对象:
 class BillDealResult(Base):
