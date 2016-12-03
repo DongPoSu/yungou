@@ -28,6 +28,8 @@ def clear_spike_goods_cache(skuids):
     for i in skuid_list:
         result = requests.get("%s/quick/tool/deletegooddetail?goodsSkuId=%s" % (host,i))
         print(result.json())
+    result = requests.get("%s/quick/tool/deletemiaosha" % (host))
+    print(result.json())
 
 
 # 添加秒杀产品
@@ -43,11 +45,26 @@ def add_spike_good(goods, date):
     else:
         print(result.json())
 
+# clear_spike_goods_cache("64745,70055,70019,73265,69379@64797,70071,73967,69357,64713@73965,67819,69811,64983,69671@63793,65905,68439,69755,67805")
 add_spike_good(
-    "68339,69689,65611,69681,67805@70005,68439,69695,68219,70011@69599,70037,64783,70011,64713@70015,70033,67819,64711,69505",
-    "2016-10-08")
+    "73965,73993,73967,69365,70057@63793,69811,69585,69681,68281@66115,74155,74950,74862,68477@65585,70071,65021,67805,64713",
+    "2016-11-25")
 query_spike_goods()
-# delete_spike_good("2016-09-21")
+# delete_spike_good("2016-11-1")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

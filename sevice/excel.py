@@ -4,12 +4,15 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 
 from common.DealStatus import PAY_SUCCESS, PAY_FAILED
+from common.ExcelUtil import WriteExcel
 from constants.db_constants import BILL_DEAL, NORMAL_DEAL
 from dao import Deal
 from sevice.member_deal import query_deal, check_bank_deal
 
-
 # 导出银行卡审核通过提现记录
+from sevice.member_service import get_tranfer_records
+
+
 def export_bank_deal(check_start_date, check_end_date, title):
     '''
     :param check_start_date: 审核开始日期
@@ -28,7 +31,8 @@ def export_bank_deal(check_start_date, check_end_date, title):
     for deal in deals:
         count += 1
         ws.append(
-            [deal.deal_code, deal.check_date.strftime('%Y-%m-%d %H:%M:%S'), count, "人民币", round(float(deal.apply_money) * 0.99,2),
+            [deal.deal_code, deal.check_date.strftime('%Y-%m-%d %H:%M:%S'), count, "人民币",
+             round(float(deal.apply_money) * 0.99, 2),
              deal.bank_account, deal.bank_user, deal.bankcard_address,
              deal.bankcard_province,
              deal.bankcard_city, deal.bank_id, "工行广州花都雅居乐支行", "3602202119100259501", "广州思埠网络开发有限公司", "代付款", "",
@@ -83,7 +87,7 @@ def import_bank_deal(filename):
 
         deal_result = Deal.BillDealResult()
         deal_result.bank_account = str(row[2].value).strip("\t").strip(" ")
-        deal_result.bank_user=row[3].value
+        deal_result.bank_user = row[3].value
         deal_result.apply_money = int(row[6].value * 100)
         if str(row[8].value) == '处理成功':
             deal_result.deal_status = PAY_SUCCESS
@@ -97,6 +101,26 @@ def import_bank_deal(filename):
     check_bank_deal(list)
 
 
+def delete_repeat_record(record_list):
+    key = dict()
+    temp_list =[]
+    for r in record_list:
+        if key.get(r.transfer_code,None) is None:
+            key[r.transfer_code] = 1
+            temp_list.append(r)
+    return temp_list
 
 
-
+def export_transfer_records(title):
+    record_list = delete_repeat_record(get_tranfer_records())
+    if record_list is not None:
+        t = WriteExcel(title)
+        t.create_sheet()
+        head_line = ["转出号", "金额", "转出人", "转出人电话", "收款人", "收款人电话", "备注", "转账日期"]
+        t.write_content(head_line)
+        for record in record_list:
+            temp_list = [record.transfer_code, round(record.transfer_money, 2), record.out_user_name, record.out_phone,
+                         record.in_user_name, record.in_phone,
+                         record.transfer_memo, record.create_time.strftime('%Y-%m-%d %H:%M:%S')]
+            t.write_content(temp_list)
+        t.write_close()

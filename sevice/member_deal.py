@@ -5,8 +5,7 @@ from common.DealStatus import PAY_SUCCESS, PAY_FAILED
 from constants import db_constants
 from constants.db_constants import BILL_DEAL
 from dao import Deal
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+
 
 
 
@@ -41,7 +40,7 @@ def query_deal(start_date, end_date, apply_type):
     for i in range(db_constants.DB_SIZE):
         db_index = StrUtil.format(i)
         ip = DbUtil.get_db_ip(db_index)
-        session = get_db_session(ip)
+        session = DbUtil.get_db_session(ip)
         exc_sql = sql.format(db_index=db_index)
         print(exc_sql)
         # try:
@@ -54,14 +53,7 @@ def query_deal(start_date, end_date, apply_type):
     return deals
 
 
-def get_db_session(ip):
-    db_url = "mysql+pymysql://root:Aa123456@{ip}:3306/sibu_directsale"
-    # 初始化数据库连接:
-    engine = create_engine(db_url.format(ip=ip), connect_args={'charset': 'utf8'}, echo=True)
-    # 创建DBSession类型:
-    db_session = sessionmaker(bind=engine)
-    session = db_session()
-    return session
+
 
 
 def check_bank_deal(deal_result):
@@ -75,7 +67,7 @@ def check_bank_deal(deal_result):
 def query_member_id(db_index, deals):
 
     ip = DbUtil.get_db_ip(db_index)
-    session = get_db_session(ip=ip)
+    session = DbUtil.get_db_session(ip=ip)
     exc_sql = "SELECT c.member_id,d.deal_id"\
     " FROM" \
     " sibu_directsale_member_{db_index}.member_account c" \
@@ -124,7 +116,7 @@ def update_success(db_index,deal):
     " deal_id  = '%s'" \
     " AND" \
     " deal_status = 2" % (db_index,deal.deal_status,deal.give_invoice,deal.deal_id)
-    session = get_db_session(ip = DbUtil.get_db_ip(db_index))
+    session = DbUtil.get_db_session(ip = DbUtil.get_db_ip(db_index))
     session.begin(subtransactions=True)
     try:
         result = session.execute(exec_sql)
@@ -162,7 +154,7 @@ def update_failed(db_index, deal):
     profit_total_sql = "UPDATE sibu_directsale_profit_%s.member_profit_total " \
                        " SET available_money = available_money +%d," \
                        " deal_sum_money = deal_sum_money -%d  WHERE member_id ='%s'" % (db_index,deal.apply_money,deal.apply_money,deal.member_id)
-    session = get_db_session(ip=DbUtil.get_db_ip(db_index))
+    session = DbUtil.get_db_session(ip=DbUtil.get_db_ip(db_index))
     try:
         session.execute(exec_deal_sql)
         session.execute(profit_total_sql)
@@ -174,7 +166,7 @@ def update_failed(db_index, deal):
 
 
 def get_member_id(phone_list):
-    session = get_db_session(ip=DbUtil.get_db_ip("master"))
+    session = DbUtil.get_db_session(ip=DbUtil.get_db_ip("master"))
     fo = open("../resources/text.txt", "w+")
     fo.write('[')
     for i in phone_list:
@@ -193,7 +185,7 @@ def delete_member_deal(ids):
           " AND d.apply_member_id IN {ids}"
     for db_index in range (db_constants.DB_SIZE):
         db_index = StrUtil.format(db_index)
-        session = get_db_session(ip=DbUtil.get_db_ip(db_index))
+        session = DbUtil.get_db_session(ip=DbUtil.get_db_ip(db_index))
         try:
             result = session.execute(sql.format(db_index=db_index, ids=ids[0]))
             session.commit()
@@ -209,7 +201,7 @@ def query_member_deal(ids):
     result_list = []
     for db_index in range(db_constants.DB_SIZE):
         db_index = StrUtil.format(db_index)
-        session = get_db_session(ip=DbUtil.get_db_ip(db_index))
+        session = DbUtil.get_db_session(ip=DbUtil.get_db_ip(db_index))
         result = session.query(Deal.BillDeal).from_statement(sql.format(db_index=db_index, ids=ids)).all()
         result_list.extend(result)
     for deal in result_list:

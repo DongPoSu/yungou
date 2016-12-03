@@ -1,5 +1,7 @@
 # coding=utf-8
 from common.Config import ENVIRONMENT
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 YUN_PRE_ORDER_CODE = "Y"
 LAST_CHAR_1 = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f")
@@ -104,3 +106,11 @@ def get_db_ip(module):
             return db_ip.get("12-15")
 
 
+def get_db_session(ip):
+    db_url = "mysql+pymysql://root:Aa123456@{ip}:3306/sibu_directsale"
+    # 初始化数据库连接:
+    engine = create_engine(db_url.format(ip=ip), connect_args={'charset': 'utf8'}, echo=True)
+    # 创建DBSession类型:
+    db_session = sessionmaker(bind=engine)
+    session = db_session()
+    return session
