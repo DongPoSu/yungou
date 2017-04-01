@@ -4,9 +4,9 @@ from sevice import excel
 
 
 # 银行卡提现
-# excel.export_bank_deal("2016-11-01 00:00:00", "2016-11-30 23:59:59", "20161201")
+# excel.export_bank_deal("2016-12-12 00:00:00", "2016-12-14 23:59:59", "201612015")
 # 微信提现
-excel.export_wx_deal("2016-12-01 00:00:00", "2016-12-01 23:59:59", "20161202")
+excel.export_wx_deal("2016-12-14 00:00:00", "2016-12-14 23:59:59", "201612015")
 
 # excel.import_bank_deal("resources/20160922银行卡打款结果.xlsx")
 
