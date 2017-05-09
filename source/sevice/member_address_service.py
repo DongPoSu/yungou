@@ -1,7 +1,9 @@
 import pymysql
+
 import common.DbUtil as DbUtil
 import common.StrUtil as StrUtil
 import constants.db_constants as db_constants
+
 
 # 扫描异常订单
 def scan_exception_address():

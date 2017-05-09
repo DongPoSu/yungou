@@ -1,9 +1,12 @@
 # coding=utf-8
 # !/usr/bin/python
 
-import PyMysql
-import common.DbUtil as DbUtil
 import re
+
+import PyMysql
+
+import common.DbUtil as DbUtil
+
 
 def subtract_three_month(member_list):
     failed_count = 0

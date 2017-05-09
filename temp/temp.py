@@ -1,1 +1,0 @@
-print(str(round(123.116, 2)))

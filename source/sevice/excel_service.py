@@ -8,8 +8,6 @@ from common.ExcelUtil import WriteExcel
 from constants.db_constants import BILL_DEAL, NORMAL_DEAL
 from dao import Deal
 from sevice.member_deal import query_deal, check_bank_deal
-
-# 导出银行卡审核通过提现记录
 from sevice.member_service import get_tranfer_records
 
 

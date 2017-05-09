@@ -1,7 +1,7 @@
 # coding=utf8
 from common import DbUtil
 from common import StrUtil
-from common.DealStatus import PAY_SUCCESS, PAY_FAILED
+from common.DealStatus import PAY_SUCCESS
 from constants import db_constants
 from constants.db_constants import BILL_DEAL
 from dao import Deal

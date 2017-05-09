@@ -1,8 +1,7 @@
 import pymysql
+
 import common.DbUtil as DbUtil
 import common.StrUtil as StrUtil
-import datetime
-import sys
 import constants.db_constants as db_constants
 
 
@@ -92,7 +91,7 @@ def update_trade_id_by_create(start_date, end_date):
     exec_trade_sql += ")a WHERE a.trade_id NOT LIKE ('T%') AND a.create_date>='" + start_date + "' AND a.create_date<='" + end_date + "'"
     for i in range(db_constants.DB_SIZE):
         db_url = DbUtil.get_db_ip(StrUtil.format(i))
-        db = pymysql.connect(host=db_url, user="root", passwd="Aa123456", db="sibu_directsale_order_log_"+StrUtil.format(i), charset="utf8mb4")
+        db = pymysql.connect(host=db_url, user="root", passwd="Aa123456", db="sibu_directsale_order_log_" + StrUtil.format(i), charset="utf8mb4")
         cursor = db.cursor()
         cursor.execute(exec_trade_sql)
         update_order_trade(cursor.fetchall())
